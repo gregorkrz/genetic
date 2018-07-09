@@ -12,7 +12,7 @@ gen = 0
 ########################
 percent_breeded = 0.20
 percent_mutated = 0.45
-
+mutation_chance = 0.45
 #######################
 
 
@@ -91,6 +91,7 @@ def plotff(population):
 		plt.axis([0,5,0,40])
 		plt.ylabel("number of chromosomes")
 		plt.plot(*zip(*sorted(ffs2.items())))
+		
 		plt.savefig("gen"+str(gen)+".png")
 	
 	
@@ -110,6 +111,7 @@ def best(population): # returns an array of best chromosomes in the population
 				for a in range(15):
 					ret.append(population[i])
 	return np.array(ret)
+
 
 def rn(inp):
 	#returns random index of the input array
@@ -161,8 +163,9 @@ def newGen(population):
 			ret.append(c)
 		#	print("RET",ret)
 	for i in range(round(len(population)*percent_mutated)):
-		mut = mutate(b[rn(b)])
-		ret.append(mut)
+		if(np.random.rand() < mutation_chance):
+			mut = mutate(b[rn(b)])
+			ret.append(mut)
 	while(len(ret) < len(population)):
 		ret.append(b[rn(b)])
 	return np.array(ret)

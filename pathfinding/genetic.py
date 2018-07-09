@@ -11,7 +11,7 @@ gen = 0
 
 ########################
 percent_breeded = 0.20
-percent_mutated = 0.45
+percent_mutated = 0.25
 
 #######################
 
@@ -24,8 +24,10 @@ geners = []
 
 def initPop(chrlen1,num1):
 	x = []
-	for i in range(20):
-		x.append(np.random.randint(1,20))
+	for i in range(num1):
+		x.append([])
+		for j in range(chrlen):
+			x[i].append(np.random.randint(1,20))
 	return np.array(x)
 	
 pop = initPop(chrlen,num)
@@ -48,7 +50,7 @@ def breed(mum,dad):
 
 
 def fitness(population):
-	#  A fitness function (fitness = distance of the path)
+	#  the fitness function (fitness = distance of the path)
 	r = np.array(num*[0.0])
 
 	for i in range(num):
@@ -57,11 +59,9 @@ def fitness(population):
 		for x in range(20):
 			if(x%2):
 				# 1,3,5...
-
 				pts[1].append(population[i][x])
 
 			else:
-				print(population[i][x])
 				pts[0].append(population[i][x])
 		pts[0].append(20)
 		pts[1].append(20)
@@ -104,29 +104,35 @@ def plotff(population):
 		plt.figure()
 		plt.title("Generation " + str(gen))
 		plt.xlabel("fitness function")
-		plt.axis([0,5,0,40])
+
 		plt.ylabel("number of chromosomes")
 		plt.plot(*zip(*sorted(ffs2.items())))
 		plt.savefig("gen"+str(gen)+".png")
 	
 	
 
-def best(population): # returns an array of best chromosomes in the population
+def best(population,sensitivity=0): # returns an array of the best chromosomes in the population
 	ret = []
 	f = fitness(population)
 	avg = np.median(f)
 	print("avg",avg,"FF len",len(f))
 	#print(f)
 	for i in range(len(f)):
-		if(f[i] < avg):
+		if(f[i] < avg and not sensitivity):
 			ret.append(population[i])
 			#if(f[i] >= avg + 1.5*np.std(f)):
 			#	print("wow!",population[i])
 				
 			#	for a in range(15):
 			#		ret.append(population[i])
+		if(sensitivity):
+			c = np.argsort(f)
+			# now choose the best/lowest 10%
+			for y in range(round(len(f)/10)):
+				
+			ret.append(population[i])
 	return np.array(ret)
-
+	
 def rn(inp):
 	#returns random index of the input array
 	if(len(inp)<=0): print("ERR",len(inp),"INP",inp)
@@ -163,30 +169,34 @@ def newGen(population):
 	# returns a new generation
 	
 	b = best(population)
+	if(1):
 	#print("B.LENGTH",len(b))
-
-	for i in range(round(len(b)*percent_breeded/2)):
+		if(len(b)==0): b = best(population,1)
+		for i in range(round(len(b)*percent_breeded/2)):
 		#print(i)
-		rnd1 = b[rn(b)]
-		rnd2 = b[rn(b)]
+			rnd1 = b[rn(b)]
+			rnd2 = b[rn(b)]
 		#print("parents",rnd1,rnd2)
-		children = breed(rnd1,rnd2)
+			children = breed(rnd1,rnd2)
 		#print("children",children)
 		#print("CHILDREN",children[0],children[1])
-		for c in children:
-			ret.append(c)
+			for c in children:
+				ret.append(c)
 		#	print("RET",ret)
-	for i in range(round(len(population)*percent_mutated)):
-		mut = mutate(b[rn(b)])
-		ret.append(mut)
-	while(len(ret) < len(population)):
-		ret.append(b[rn(b)])
-	return np.array(ret)
+		for i in range(round(len(population)*percent_mutated)):
+			if(np.random.rand() < 0.3):
+				mut = mutate(b[rn(b)])
+				ret.append(mut)
+		while(len(ret) < len(population)):
+			ret.append(b[rn(b)])
+		return np.array(ret)
 
+	
+		
 av1=0
 
-bestfitness = 0
-
+bestfitness = 100000
+bestchr = "<empty chromosome>"
 
 for i in range(100):
 	print("generation",i)
@@ -200,11 +210,13 @@ for i in range(100):
 		i = i - 1
 	else:
 		av1 = np.median(fit)
-		if(np.amax(fit)>bestfitness): bestfitness = np.amax(fit)
+		if(np.amax(fit)<bestfitness):
+			bestfitness = np.amax(fit)
+			bestchr = pop[np.argmax(bestfitness)]
 		pop = pop_temp
 		if(i==99): print(pop[0])
 		print("Best one so far:",bestfitness)
-		print(pop[np.argmax(fit)])
+		print(bestchr)
 plt.figure()
 plt.plot(geners,avgs,label="avg")
 plt.plot(geners,stddevs,label="stddev")
