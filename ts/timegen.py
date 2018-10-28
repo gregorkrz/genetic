@@ -1,12 +1,50 @@
 import matplotlib.pyplot as plt
-
+import math
 from time import sleep
 import numpy as np
 
 chrlen = 20
-num = 200
+num = 1000
 
-
+def generatePoint(NoOfTrait=8):
+    happendx = []
+    happendy = []
+    point = [2 * [0] for i in range(NoOfTrait)]#range confused!!!
+    #for i in range(0,NoOfTrait):
+    '''rndx = random.randint(0,100)
+        rndy = random.randint(0,100)
+        check(happendx, rndx,101)#can be better
+        check(happendy, rndy,101)#can be better
+        happendx.append(rndx)
+        happendy.append(rndy)
+        point[i][0] = rndx
+        point[i][1] = rndy'''
+    #city1
+    point[0][0] = 50
+    point[0][1] = 0
+    #city2
+    point[1][0] = 2
+    point[1][1] = 10
+    #city3
+    point[2][0] = 25
+    point[2][1] = 20
+    #city4
+    point[3][0] = 11
+    point[3][1] = 30
+    #city5
+    point[4][0] = 92
+    point[4][1] = 40
+    #city6
+    point[5][0] = 22
+    point[5][1] = 50
+    #city7
+    point[6][0] = 5
+    point[6][1] = 60
+    #city8
+    point[7][0] = 0
+    point[7][1] = 70
+      
+    return point;
 
 gen = 0
 
@@ -24,21 +62,21 @@ geners = []
 first40 = 0
 first40chr = []
 def initPop(chrlen1,num1):
-	x = []
+	b = []
+	
 	for i in range(num1):
-		x.append([])
-		for j in range(chrlen):
-			x[i].append(np.random.randint(1,20))
-	print(x)
-	1/0
-	return np.array(x)
+		b.append([])
+		t = np.arange(8)+1
+		np.random.shuffle(t)
+		b[i] = t
+	return np.array(b)
 	
 pop = initPop(chrlen,num)
 
 
 
 def breed(mum,dad):
-	
+	return [mum,dad]
 	# crossover
 	
 	pt = np.random.randint(0,chrlen-1)
@@ -52,27 +90,29 @@ def breed(mum,dad):
 
 
 
-def fitness(population):
-	#  the fitness function (fitness = distance of the path)
-	r = np.array(num*[0.0])
 
-	for i in range(num):
-		pts = [[0],[0]]
-		
-		for x in range(20):
-			if(x%2):
-				# 1,3,5...
-				pts[1].append(population[i][x])
-
-			else:
-				pts[0].append(population[i][x])
-		pts[0].append(20)
-		pts[1].append(20)
-		for y in range(len(pts[0])-1):
-			#r[i] += np.sqrt((pts[0][y]-pts[0][y+1])**2+(pts[1][y]-pts[1][y+1])**2)
-			r[i] += abs(pts[0][y]-pts[0][y+1])+abs(pts[1][y]-pts[1][y+1])
-			
-	return r
+def fitness(hr):
+	point = generatePoint()
+	ptList = []
+	for i in range(len(hr)):
+		ptList.append(0)
+		for a in range(1,len(hr[i])):       
+			x = point[hr[i][a-1]-1][0]-point[hr[i][a]-1][0]
+			y = point[hr[i][a-1]-1][1]-point[hr[i][a]-1][1]
+			x1 = math.pow(x,2)
+			y1 = math.pow(y,2)
+			z = x1 + y1
+			z = math.sqrt(z)
+			#ptList.append(z)
+			ptList[i] += z
+		x = point[hr[i][len(hr[i])-1]-1][0]-point[hr[i][0]-1][0]
+		y = point[hr[i][len(hr[i])-1]-1][1]-point[hr[i][0]-1][1]
+		x1 = math.pow(x,2)
+		y1 = math.pow(y,2)
+		z = x1 + y1
+		z = math.sqrt(z)
+		ptList[i] += z
+	return ptList
 
 
 def plotff(population):
@@ -147,19 +187,26 @@ def rn(inp):
 
 
 def mutate(gene):
-	# swaps 2 random genes (20% chance)
-	if(np.random.rand() <= 0.2):
+	# swaps 2 random genes (90% chance)
+	if(np.random.rand() <= 0.9):
 		rnd1 = rn(gene)
 		rnd2 = rn(gene)
 		t = gene[rnd2]
 		gene[rnd2] = gene[rnd1]
 		gene[rnd1] = t
-	# variate the inputs by up to +-2
-	for i in range(len(gene)):
-		if(np.random.rand()<rand_mut):
-			a = np.random.randint(-2,2)
-			if(not (gene[i]+a > 20 or gene[i]+a < 1)):
-				gene[i] = gene[i]+a
+	
+	if(np.random.rand() <= 0.9):
+		rnd1 = rn(gene)
+		rnd2 = rn(gene)
+		t = gene[rnd2]
+		gene[rnd2] = gene[rnd1]
+		gene[rnd1] = t
+	if(np.random.rand() <= 0.9):
+		rnd1 = rn(gene)
+		rnd2 = rn(gene)
+		t = gene[rnd2]
+		gene[rnd2] = gene[rnd1]
+		gene[rnd1] = t
 	return gene
 
 def newGen(population):
@@ -169,10 +216,10 @@ def newGen(population):
 	
 	# returns a new generation
 	
-	b = best(population)
+	#b = best(population)
 	if(1):
 	#print("B.LENGTH",len(b))
-		if(len(b)==0): b = best(population,1)
+		b = best(population,1)
 		for i in range(round(len(b)*percent_breeded/2)):
 		#print(i)
 			rnd1 = b[rn(b)]
@@ -184,7 +231,7 @@ def newGen(population):
 			for c in children:
 				ret.append(c)
 		#	print("RET",ret)
-		for i in range(round(len(population))):
+		for i in range(round(len(population)/3)):
 			mut = mutate(b[rn(b)])
 			ret.append(mut)
 		while(len(ret) < len(population)):
@@ -199,7 +246,7 @@ bestfitness = 100000
 bestchr = "<empty chromosome>"
 
 if(1):
-	for i in range(30):
+	for i in range(150):
 		print("generation",i)
 		if(i==0): firstone=pop
 		plotff(pop)
@@ -222,14 +269,8 @@ if(1):
 			if(i==99): print(pop[0])
 			print("Best one so far:",bestfitness)
 			print(bestchr)
-			
-plt.figure()
-plt.plot(geners,avgs,label="avg")
-plt.plot(geners,stddevs,label="stddev")
-plt.plot(geners,bestgens,label="best one")
-plt.legend()
-plt.savefig('stats.png')
-print("first40:",first40,first40chr)
+
+
 
 '''
 def bestFromGen(population): #WIP

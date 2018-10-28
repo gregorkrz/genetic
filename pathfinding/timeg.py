@@ -1,10 +1,10 @@
-import matplotlib.pyplot as plt
 
-from time import sleep
+
+
 import numpy as np
 
 chrlen = 20
-num = 200
+num = 300
 
 
 
@@ -29,8 +29,6 @@ def initPop(chrlen1,num1):
 		x.append([])
 		for j in range(chrlen):
 			x[i].append(np.random.randint(1,20))
-	print(x)
-	1/0
 	return np.array(x)
 	
 pop = initPop(chrlen,num)
@@ -75,43 +73,6 @@ def fitness(population):
 	return r
 
 
-def plotff(population):
-	global gen
-	b = fitness(population)
-	m = np.amin(b)
-	x = np.amax(b)
-	stddevs.append(np.std(b))
-	avgs.append(np.median(b))
-	geners.append(gen)
-
-	ffs = {}
-	k = (x-m)/100
-
-	for i in range(len(b)):
-		#if(b[i] > 1): print("ugh")
-		#print("iter",i)
-		#if(x-m == 0): print("err", x,m,b[i])
-		tmp = round((b[i]-m)/(x-m) * 99) # the number 1-100
-		#print("i=",i,"b[i]=",b[i],"x,m=",x,m)
-		#print("tmp",tmp)
-		#tmp = tmp * (x-m) + m
-		if(tmp in ffs):
-			ffs[tmp] += 1
-		else:
-			ffs[tmp]=1
-		#print(ffs)
-	ffs2 = {}	
-	for key in ffs:
-		ffs2[key/100*(x-m)+m]=ffs[key]
-	if(0 and gen%5 == 0): 
-		plt.figure()
-		plt.title("Generation " + str(gen))
-		plt.xlabel("fitness function")
-
-		plt.ylabel("number of chromosomes")
-		plt.plot(*zip(*sorted(ffs2.items())))
-		plt.axis([0,160,0,40])
-		plt.savefig("gen"+str(gen)+".png")
 def best(population,sensitivity=0): # returns an array of the best chromosomes in the population
 	ret = []
 	f = fitness(population)
@@ -199,10 +160,10 @@ bestfitness = 100000
 bestchr = "<empty chromosome>"
 
 if(1):
-	for i in range(30):
+	for i in range(100):
 		print("generation",i)
 		if(i==0): firstone=pop
-		plotff(pop)
+
 		pop_temp = newGen(pop)
 		fit = (fitness(pop_temp))
 		if(0 and np.median(fit) < av1):
@@ -223,13 +184,7 @@ if(1):
 			print("Best one so far:",bestfitness)
 			print(bestchr)
 			
-plt.figure()
-plt.plot(geners,avgs,label="avg")
-plt.plot(geners,stddevs,label="stddev")
-plt.plot(geners,bestgens,label="best one")
-plt.legend()
-plt.savefig('stats.png')
-print("first40:",first40,first40chr)
+
 
 '''
 def bestFromGen(population): #WIP
